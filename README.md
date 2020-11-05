@@ -1,13 +1,13 @@
 
-# 온라인서점 - 예쓰23
+# 온라인도서관
 
-본 프로그램은 온라인서점 시스템입니다.
+본 프로그램은 온라인도서관 시스템입니다.
 - 체크포인트 : https://workflowy.com/s/assessment-check-po/T5YrzcMewfo4J6LW
 
 
 # Table of contents
 
-- [온라인서점시스템](#---)
+- [온라인도서관시스템](#---)
   - [서비스 시나리오](#서비스-시나리오)
   - [체크포인트](#체크포인트)
   - [분석/설계](#분석설계)
@@ -27,22 +27,22 @@
 # 서비스 시나리오
 
 기능적 요구사항
-1. 고객이 책을 주문한다
-2. 주문을 하면 결제 기능이 호출된다
-3. 배송팀에서 배송한다
-4. 고객이 주문 취소할 수 있다
-5. 주문이 취소되면 결재가 취소된다
-6. 결재가 취소되면 배송이 취소된다
-7. 고객이 주문상태를 확인한다
+1. 고객이 책을 대여요청한다
+2. 대여요청을 하면 사서가 확인하고 대여를 확정한다
+3. 대여를 확정하면 바로 배송팀에서 배송한다
+4. 고객이 요청 취소할 수 있다
+5. 대여요청이 취소되면 대여가 취소된다
+6. 대여가 취소되면 배송이 취소된다
+7. 고객이 책 대여요청 상태를 확인한다
 
 비기능적 요구사항
 1. 트랜잭션
-    - 결제가 되지 않은 주문건은 아예 거래가 성립되지 않아야 한다  Sync 호출 
+    - 대여확정을 하면 바로 배송이 시작된다  Sync 호출 
 2. 장애격리
-    - 주문은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
-    - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다  Circuit breaker, fallback
+    - 대여요청은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
+    - 대여요청 시스템이 과중되면 사용자를 잠시동안 받지 않고 대여요청를 잠시후에 하도록 유도한다  Circuit breaker, fallback
 3. 성능
-    - 고객이 자주 주문상태를 확인할 수 있어야 한다  CQRS
+    - 고객이 자주 대여요청 상태를 확인할 수 있어야 한다  CQRS
 
 
 # 체크포인트
@@ -107,40 +107,16 @@
 
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/mE5NnEwVhiZ6GAhrFPdKZIyqntJ2/share/13bc76042c47f7313aa268132937eb53/-MLCDCJbeFj1l2L04eU9
+* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/iYuC49LnhuQSkHadm2m9i9Oljfo2/mine/4bf59662b42096ee3115c9b670c84dd9/-MLMBNexE6bQFrKcg8Zm
 
 
 ### 이벤트 도출
-![image](https://user-images.githubusercontent.com/65432084/98187615-b50a5800-1f54-11eb-8190-fcd929e9d899.PNG)
+![image](https://user-images.githubusercontent.com/65432084/98234806-4f45bc80-1fa4-11eb-97f2-8eece25a2ac1.PNG)
 
-
-    - 도메인 서열 분리 
-        - Core Domain:  order, delivery : 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 order 의 경우 1주일 1회 미만, delivery 의 경우 1개월 1회 미만
-        - Supporting Domain: 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
-        - General Domain:   pay : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
-
-
-### 기능적/비기능적 요구사항을 커버하는지 검증
-
-![image](https://user-images.githubusercontent.com/65432084/98189196-cb65e300-1f57-11eb-9d3a-f6e63cdd6539.PNG)
-
-    - 고객이  주문한다 (ok)
-    - 주문을 하면 결제 기능이 호출된다 (ok)
-    - 고객이 주문 취소할 수 있다 (ok)
-    - 주문이 취소되면 결재가 취소된다 (ok)
-    - 결재가 취소되면 배송이 취소된다 (ok)
-    - 고객이 주문상태를 확인한다 (ok)
-    
-### 비기능 요구사항에 대한 검증
-
-![image](https://user-images.githubusercontent.com/65432084/98189295-0405bc80-1f58-11eb-8501-5a3623d315a7.PNG)
-
-      1 결제가 되지 않은 주문건은 아예 거래가 성립되지 않아야 한다  Sync 호출 (ok)
-      2 주문은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency (ok)
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-![image](https://user-images.githubusercontent.com/65432084/98189668-c81f2700-1f58-11eb-8ad7-988e600db80c.PNG)
+![image](https://user-images.githubusercontent.com/65432084/98236084-21617780-1fa6-11eb-92d3-f3ba823a8e78.PNG)
 
 
     - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
