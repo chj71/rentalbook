@@ -1,0 +1,13 @@
+rentalbook\MypageViewHandler.class
+rentalbook\OrderCancelled.class
+rentalbook\RentCanceled.class
+rentalbook\config\kafka\KafkaProcessor.class
+rentalbook\AbstractEvent$1.class
+rentalbook\Mypage.class
+rentalbook\Ordered.class
+rentalbook\AbstractEvent.class
+rentalbook\MypageApplication.class
+rentalbook\PolicyHandler.class
+rentalbook\DeliveryCanceled.class
+rentalbook\MypageRepository.class
+rentalbook\Shipped.class
